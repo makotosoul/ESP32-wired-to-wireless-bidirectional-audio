@@ -6,12 +6,12 @@
 uint8_t* peerAddress = nodeBAddress;
 
 // --- Callbacks ---
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+void OnDataSent(const wifi_tx_info_t *info, esp_now_send_status_t status) {
   Serial.print("\r\nLast Packet Send Status: ");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
-void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
+void OnDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
   char message[len + 1];
   memcpy(message, incomingData, len);
   message[len] = '\0';
@@ -56,9 +56,11 @@ void setup() {
 
   // Register peer
   esp_now_peer_info_t peerInfo;
+  memset(&peerInfo, 0, sizeof(peerInfo)); // Zero-initialize structure
   memcpy(peerInfo.peer_addr, peerAddress, 6);
   peerInfo.channel = 0;  
   peerInfo.encrypt = false;
+  peerInfo.ifidx = WIFI_IF_STA; // Explicitly set interface
   
   if (esp_now_add_peer(&peerInfo) != ESP_OK) {
     Serial.println("Failed to add peer");
