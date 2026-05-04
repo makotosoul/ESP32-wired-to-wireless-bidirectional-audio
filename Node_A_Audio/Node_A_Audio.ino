@@ -5,8 +5,9 @@
 #include "USBAudioCard.h"
 #include "../peers.h"
 
-#define SAMPLE_RATE     16000
-#define PACKET_SIZE     240    
+// --- High Fidelity Upgrade ---
+#define SAMPLE_RATE     44100  // YouTube/CD Quality
+#define PACKET_SIZE     240    // Keep ESP-NOW happy
 #define TONE_MODE_PIN   0      
 
 uint8_t* remoteAddress = nodeBAddress;
@@ -52,7 +53,7 @@ void setup() {
   peerInfo.encrypt = false;
   esp_now_add_peer(&peerInfo);
 
-  Serial.println("[Node A] One-Way Stream Source Ready.");
+  Serial.println("[Node A] 44.1kHz High-Fidelity Source Ready.");
 }
 
 float phase = 0;
@@ -66,6 +67,7 @@ void loop() {
       if (phase > 2.0 * PI) phase -= 2.0 * PI;
     }
     esp_now_send(remoteAddress, (uint8_t*)out_acc_buffer, PACKET_SIZE);
-    delay(7); 
+    // Removed delay(7) to allow full 44.1kHz throughput in Tone Mode
+    delayMicroseconds(2000); 
   }
 }
