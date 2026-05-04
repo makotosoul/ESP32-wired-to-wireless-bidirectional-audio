@@ -1,88 +1,17 @@
-#include <esp_now.h>
-#include <WiFi.h>
-#include "../peers.h"
-
-// Node A's peer is Node B
-uint8_t* peerAddress = nodeBAddress;
-
-// --- Callbacks ---
-void OnDataSent(const wifi_tx_info_t *info, esp_now_send_status_t status) {
-  Serial.print("\r\nLast Packet Send Status: ");
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-}
-
-void OnDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
-  char message[len + 1];
-  memcpy(message, incomingData, len);
-  message[len] = '\0';
-  Serial.print("\r\n[Node B]: ");
-  Serial.println(message);
-  Serial.print("[Node A]: "); // Re-print prompt
-}
-
-// --- FreeRTOS Task ---
-void TaskSerialRead(void *pvParameters) {
-  (void) pvParameters;
-  
-  for (;;) {
-    if (Serial.available()) {
-      String msg = Serial.readStringUntil('\n');
-      msg.trim();
-      
-      if (msg.length() > 0) {
-        esp_err_t result = esp_now_send(peerAddress, (uint8_t *) msg.c_str(), msg.length());
-        
-        if (result != ESP_OK) {
-          Serial.println("Error sending the data");
-        }
-      }
-      Serial.print("[Node A]: ");
-    }
-    vTaskDelay(10 / portTICK_PERIOD_MS); // Small delay to prevent watchdog issues
-  }
-}
-
 void setup() {
   Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
-
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
-    return;
+  // Give Windows/Linux time to catch up
+  for(int i=0; i<5; i++) {
+    delay(1000);
+    Serial.println("Starting up...");
   }
-
-  esp_now_register_send_cb(OnDataSent);
-  esp_now_register_recv_cb(OnDataRecv);
-
-  // Register peer
-  esp_now_peer_info_t peerInfo;
-  memset(&peerInfo, 0, sizeof(peerInfo)); // Zero-initialize structure
-  memcpy(peerInfo.peer_addr, peerAddress, 6);
-  peerInfo.channel = 0;  
-  peerInfo.encrypt = false;
-  peerInfo.ifidx = WIFI_IF_STA; // Explicitly set interface
-  
-  if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-    Serial.println("Failed to add peer");
-    return;
-  }
-
-  // Create the Serial Read Task
-  xTaskCreatePinnedToCore(
-    TaskSerialRead,
-    "SerialRead",
-    4096,  // Stack size
-    NULL,
-    1,     // Priority
-    NULL,
-    1      // Core 1
-  );
-
-  Serial.println("Node A Initialized. Type your message below:");
-  Serial.print("[Node A]: ");
+  Serial.println("========================================");
+  Serial.println("ESP32-S3 N16R8 RECOVERY SUCCESSFUL");
+  Serial.println("Hardware is alive and running!");
+  Serial.println("========================================");
 }
 
 void loop() {
-  // FreeRTOS handles the logic in TaskSerialRead
-  vTaskDelete(NULL); 
+  Serial.println("ALIVE - Waiting for your instructions...");
+  delay(1000);
 }
