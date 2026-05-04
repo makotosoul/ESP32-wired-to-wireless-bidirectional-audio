@@ -1,149 +1,67 @@
-#include <esp_now.h>
-#include <WiFi.h>
-#include <esp_wifi.h>
-#include <Wire.h>
-#include "ESP_I2S.h" 
-#include "freertos/ringbuf.h"
-#include "../peers.h"
+/**
+ * @brief We just set up the codec for a predefined board (AudioKitEs8388V1)
+ * This follows the official library example for AI-Thinker boards.
+ */
+#include "AudioBoard.h"
+#include "ESP_I2S.h"
+#include <math.h>
 
-// --- Configuration ---
-#define SAMPLE_RATE     16000
-#define PACKET_SIZE     240 
-#define RING_BUF_SIZE   8192 
+using namespace audio_driver;
 
-#define I2C_SDA         33
-#define I2C_SCL         32
-#define ES8388_ADDR     0x10
-#define I2S_BCK         27
-#define I2S_WS          25
-#define I2S_DO          26
-#define I2S_MCLK        0
-#define AMP_ENABLE_PIN  21
-
-// --- Globals ---
-uint8_t* peerAddress = nodeAAddress;
 I2SClass i2s;
-RingbufHandle_t audio_ring_buf;
-volatile uint32_t recv_count = 0;
-uint32_t last_print = 0;
-bool byte_swap_enabled = true; // Most ES8388/ESP32 setups need this
-
-void writeReg(uint8_t reg, uint8_t val) {
-  Wire.beginTransmission(ES8388_ADDR);
-  Wire.write(reg); Wire.write(val);
-  Wire.endTransmission();
-}
-
-void init_es8388() {
-  Wire.begin(I2C_SDA, I2C_SCL);
-  pinMode(AMP_ENABLE_PIN, OUTPUT);
-  digitalWrite(AMP_ENABLE_PIN, HIGH);
-  pinMode(19, OUTPUT); digitalWrite(19, HIGH); 
-  delay(200);
-
-  writeReg(0x00, 0x80); delay(50); 
-  writeReg(0x00, 0x00); 
-  writeReg(0x01, 0x30); 
-  writeReg(0x02, 0x00); 
-  writeReg(0x03, 0x00); 
-  writeReg(0x04, 0x3c); 
-  writeReg(0x08, 0x00); // Slave Mode
-
-  // --- I2S FORMAT ---
-  // 0x17: Bit 5:4 Format (00=I2S), Bit 3:1 Length (011=16-bit)
-  // 0001 1000 = 0x18
-  writeReg(0x17, 0x18); 
-  
-  writeReg(0x26, 0x00); 
-  writeReg(0x27, 0x90); // LOUT1/ROUT1
-  writeReg(0x2a, 0x00); 
-  writeReg(0x2b, 0x22); // Volume
-  writeReg(0x2c, 0x22); 
-  
-  Serial.println("[Node B] Codec Configured for 16-bit Standard I2S.");
-}
-
-void setup_i2s() {
-  i2s.setPins(I2S_BCK, I2S_WS, I2S_DO, -1, I2S_MCLK);
-  // Using 16-bit Stereo Standard I2S
-  i2s.begin(I2S_MODE_STD, SAMPLE_RATE, I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO, I2S_STD_SLOT_BOTH);
-}
-
-void OnDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
-  if (len == PACKET_SIZE) {
-    recv_count++;
-    xRingbufferSend(audio_ring_buf, incomingData, len, 0);
-  }
-}
-
-void TaskAudioPlayback(void *pvParameters) {
-  size_t item_size;
-  int16_t stereo_out[120 * 2]; 
-
-  for (;;) {
-    uint8_t *item = (uint8_t *)xRingbufferReceive(audio_ring_buf, &item_size, portMAX_DELAY);
-    if (item != NULL) {
-      int16_t* mono_ptr = (int16_t*)item;
-      int num_samples = item_size / 2;
-
-      for (int i = 0; i < num_samples; i++) {
-        int16_t sample = mono_ptr[i];
-        
-        // --- THE BYTE SWAP ---
-        if (byte_swap_enabled) {
-          sample = (sample << 8) | ((sample >> 8) & 0x00FF);
-        }
-
-        stereo_out[i*2] = sample;
-        stereo_out[i*2 + 1] = sample;
-      }
-
-      i2s.write((uint8_t*)stereo_out, num_samples * 4);
-      vRingbufferReturnItem(audio_ring_buf, (void *)item);
-    }
-  }
-}
 
 void setup() {
+  // 1. Setup Logging as suggested in the README
   Serial.begin(115200);
-  delay(1000);
-  Serial.println("\n[Node B] BIT-PROTOCOL DEBUG MODE");
-  Serial.println("Type 's' to toggle Byte-Swapping.");
+  AudioDriverLogger.begin(Serial, AudioDriverLogLevel::Info); 
 
-  audio_ring_buf = xRingbufferCreate(RING_BUF_SIZE, RINGBUF_TYPE_NOSPLIT);
-  init_es8388();
-  setup_i2s();
+  // 2. Configure Codec using the predefined board object (AudioKitEs8388V1)
+  // This object automatically knows the I2C (33/32) and Power (21/22/19) pins.
+  CodecConfig cfg;
+  cfg.input_device = ADC_INPUT_LINE1;
+  cfg.output_device = DAC_OUTPUT_ALL;
+  cfg.i2s.bits = BIT_LENGTH_16BITS;
+  cfg.i2s.rate = RATE_16K; // Set to 16kHz to match our project
+  
+  Serial.println("Starting AI-Thinker AudioKit (V1/V2.2)...");
+  if (AudioKitEs8388V1.begin(cfg)) {
+    Serial.println("Board Initialized: SUCCESS");
+  } else {
+    Serial.println("Board Initialized: FAILED");
+  }
 
-  WiFi.mode(WIFI_STA);
-  esp_wifi_set_promiscuous(true);
-  esp_wifi_set_channel(1, WIFI_SECOND_CHAN_NONE);
-  esp_wifi_set_promiscuous(false);
-  if (esp_now_init() != ESP_OK) return;
-  esp_now_register_recv_cb(OnDataRecv);
+  // 3. Set Master Volume
+  AudioKitEs8388V1.setVolume(85);
 
-  esp_now_peer_info_t peerInfo;
-  memset(&peerInfo, 0, sizeof(peerInfo));
-  memcpy(peerInfo.peer_addr, peerAddress, 6);
-  peerInfo.channel = 1;
-  peerInfo.encrypt = false;
-  esp_now_add_peer(&peerInfo);
+  // 4. Setup I2S Data
+  // We fetch the pins directly from the board definition to be 100% accurate.
+  auto i2s_pins = AudioKitEs8388V1.pins().getI2SPins(PinFunction::CODEC);
+  if (i2s_pins) {
+    auto p = i2s_pins.value();
+    Serial.printf("I2S Pins: BCK:%d, WS:%d, DO:%d, MCLK:%d\n", p.bck, p.ws, p.data_out, p.mclk);
+    i2s.setPins(p.bck, p.ws, p.data_out, p.data_in, p.mclk);
+  }
+  
+  i2s.begin(I2S_MODE_STD, 16000, I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO, I2S_STD_SLOT_BOTH);
 
-  xTaskCreatePinnedToCore(TaskAudioPlayback, "Playback", 8192, NULL, 15, NULL, 0);
+  Serial.println("\n--- HARDWARE TEST READY ---");
+  Serial.println("Hold KEY 1 (usually GPIO 36) to hear a local buzz.");
 }
 
 void loop() {
-  // Allow real-time debugging
-  if (Serial.available()) {
-    char c = Serial.read();
-    if (c == 's') {
-      byte_swap_enabled = !byte_swap_enabled;
-      Serial.printf("Byte Swap: %s\n", byte_swap_enabled ? "ON" : "OFF");
+  // Use the library's official key checking method
+  if (AudioKitEs8388V1.isKeyPressed(1)) {
+    int16_t samples[256];
+    for (int i = 0; i < 128; i++) {
+      // 100Hz Square wave (LOUD)
+      int16_t val = (i % 80 < 40) ? 10000 : -10000;
+      samples[i*2] = val;
+      samples[i*2+1] = val;
     }
-  }
-
-  if (millis() - last_print > 1000) {
-    Serial.printf("[Node B] RX: %d packets/sec (Swap:%d)\n", recv_count, byte_swap_enabled);
-    recv_count = 0;
-    last_print = millis();
+    i2s.write((uint8_t*)samples, sizeof(samples));
+    
+    if (millis() % 250 < 20) {
+      Serial.println("BEEPING...");
+    }
   }
 }
