@@ -1,0 +1,2 @@
+--flash_mode dio --flash_freq 80m --flash_size 2MB
+0x10000 Node_A_Mic_Test_v2_idf.bin

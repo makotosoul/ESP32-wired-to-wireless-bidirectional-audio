@@ -1,0 +1,24 @@
+# FreeRTOS tick for stable 1 ms delays.
+CONFIG_FREERTOS_HZ=1000
+
+# UAC: speaker MONO + mic MONO, both at 48 kHz.
+# ONLY difference vs Node_A_Spk_Mic_Test_48k_idf (Test B, which works):
+#   CONFIG_UAC_SPEAKER_CHANNEL_NUM: 2 -> 1
+# Matches the bridge's UAC layout (48 kHz mono spk + mono mic).
+CONFIG_UAC_SAMPLE_RATE=48000
+CONFIG_UAC_SPEAKER_CHANNEL_NUM=1
+CONFIG_UAC_MIC_CHANNEL_NUM=1
+CONFIG_UAC_SPK_INTERVAL_MS=10
+CONFIG_UAC_MIC_INTERVAL_MS=10
+# 10 ms @ 48 kHz mono 16-bit speaker => 960 B per uac_output_cb call.
+# 10 ms @ 48 kHz mono 16-bit mic     => 960 B per uac_input_cb  call.
+
+# Pin USB / UAC worker tasks to Core 1; leave Core 0 for WiFi + ESP-NOW.
+CONFIG_UAC_TINYUSB_TASK_CORE=1
+CONFIG_UAC_SPK_TASK_CORE=1
+CONFIG_UAC_MIC_TASK_CORE=1
+CONFIG_ESP_WIFI_TASK_CORE_ID=0
+
+# Bursty ESP-NOW (one 240 B speaker packet per 10 ms UAC callback).
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32

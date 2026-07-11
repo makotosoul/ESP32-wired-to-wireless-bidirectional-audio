@@ -1,0 +1,20 @@
+# FreeRTOS tick for stable 1 ms delays (LED, pacing).
+CONFIG_FREERTOS_HZ=1000
+
+# UAC: speaker-only, 44.1 kHz STEREO.
+# Matches the Arduino Node_A_Audio.ino + Node_B_Audio.ino pair so this
+# isolation build talks to the unmodified Node_B_Audio firmware.
+CONFIG_UAC_SAMPLE_RATE=44100
+CONFIG_UAC_SPEAKER_CHANNEL_NUM=2
+CONFIG_UAC_MIC_CHANNEL_NUM=0
+CONFIG_UAC_SPK_INTERVAL_MS=10
+# 10 ms @ 44.1 kHz stereo 16-bit => 1764 bytes per uac_output_cb call.
+
+# Pin USB / UAC worker tasks to Core 1; leave Core 0 for WiFi + ESP-NOW.
+CONFIG_UAC_TINYUSB_TASK_CORE=1
+CONFIG_UAC_SPK_TASK_CORE=1
+CONFIG_ESP_WIFI_TASK_CORE_ID=0
+
+# Bursty ESP-NOW (one 240 B packet every ~5.4 ms while audio plays).
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32

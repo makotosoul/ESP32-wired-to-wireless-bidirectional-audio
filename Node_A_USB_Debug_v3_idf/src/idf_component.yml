@@ -1,0 +1,10 @@
+dependencies:
+  # Vendored locally and patched (PUBLIC -> PRIVATE on target_sources for
+  # usb_descriptors.c) to fix PlatformIO duplicate-target error. The override
+  # also stops the IDF Component Manager from re-validating and reverting the
+  # patch on every build. Transitive deps (espressif/tinyusb, cmake_utilities)
+  # are still fetched normally.
+  espressif/usb_device_uac:
+    version: "^1.2.3"
+    override_path: "../components/usb_device_uac"
+  espressif/led_strip: "^3.0.0"

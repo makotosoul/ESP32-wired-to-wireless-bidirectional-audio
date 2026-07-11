@@ -1,0 +1,17 @@
+# FreeRTOS tick for stable 1 ms delays (LED task, ESP-NOW timing).
+CONFIG_FREERTOS_HZ=1000
+
+# USB UAC: mic-only, 16 kHz mono 16-bit.
+# Matches Node_B_Mic_Test transmit format exactly (16 kHz mono ADPCM ->
+# 16 kHz mono PCM after decode), so no resampling is needed on Node A.
+CONFIG_UAC_SAMPLE_RATE=16000
+CONFIG_UAC_MIC_CHANNEL_NUM=1
+CONFIG_UAC_SPEAKER_CHANNEL_NUM=0
+# 10 ms per uac_input_cb call.
+# 10 ms @ 16 kHz mono 16-bit => 320 bytes per call.
+CONFIG_UAC_MIC_INTERVAL_MS=10
+
+# WiFi: keep PS off and grow the RX buffer pool so bursty ESP-NOW packets
+# (one every ~25 ms) don't get dropped by the radio.
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32

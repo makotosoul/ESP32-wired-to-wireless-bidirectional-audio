@@ -1,0 +1,12 @@
+# FreeRTOS tick for stable 1ms delays in LED task
+CONFIG_FREERTOS_HZ=1000
+
+# USB UAC: mic-only, 48 kHz mono (Linux / Audacity)
+CONFIG_UAC_SAMPLE_RATE=48000
+CONFIG_UAC_MIC_CHANNEL_NUM=1
+CONFIG_UAC_SPEAKER_CHANNEL_NUM=0
+CONFIG_UAC_MIC_INTERVAL_MS=10
+# 10 ms @ 48 kHz mono 16-bit => 960 bytes per uac_input_cb call
+
+# WS2812 on GPIO 48 (most ESP32-S3 DevKitC boards)
+# Change in main.c if your SixPan HW678 uses another pin.

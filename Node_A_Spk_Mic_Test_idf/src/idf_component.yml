@@ -1,0 +1,9 @@
+dependencies:
+  # Same patched copy used by Node_A_USB_Debug_v3_idf, Node_A_Audio_idf,
+  # and Node_A_Bridge_idf. With SPEAK=2 + MIC=1 here, the conditional in
+  # tusb_config_uac.h resolves to CFG_TUD_AUDIO_FUNC_1_N_AS_INT=2 -- the
+  # patched dual-AS-interface codepath that we want to exercise here.
+  espressif/usb_device_uac:
+    version: "^1.2.3"
+    override_path: "../../Node_A_USB_Debug_v3_idf/components/usb_device_uac"
+  espressif/led_strip: "^3.0.0"

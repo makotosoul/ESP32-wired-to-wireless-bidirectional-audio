@@ -1,0 +1,33 @@
+dependencies:
+  espressif/cmake_utilities:
+    component_hash: 05165f30922b422b4b90c08845e6d449329b97370fbd06309803d8cb539d79e3
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.1.1
+  espressif/led_strip:
+    component_hash: 28621486f77229aaf81c71f5e15d6fbf36c2949cf11094e07090593e659e7639
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 3.0.3
+  espressif/tinyusb:
+    component_hash: 7f73a4159dc95325ceaa4ade5e88734c4e1f5124746a3765cf61dc6157d78798
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 0.17.0~2
+  espressif/usb_device_uac:
+    component_hash: null
+    source:
+      path: /home/makotosoul/project/Thesis/Node_A_USB_Debug_v3_idf/components/usb_device_uac
+      type: local
+    version: 1.2.3
+  idf:
+    component_hash: null
+    source:
+      type: idf
+    version: 5.4.0
+manifest_hash: 4b910f098a2550af13804c36b6f8ce21c03427200bed722e0d8551b165f8443f
+target: esp32s3
+version: 1.0.0

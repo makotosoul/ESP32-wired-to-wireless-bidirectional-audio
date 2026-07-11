@@ -1,0 +1,9 @@
+dependencies:
+  # Same patched component shared with every other Node A IDF project.
+  # With SPEAK=2 + MIC=1 here, the conditional in tusb_config_uac.h
+  # resolves to CFG_TUD_AUDIO_FUNC_1_N_AS_INT=2 (same as Test C and the
+  # bridge). The only variable this test changes is the sample rate.
+  espressif/usb_device_uac:
+    version: "^1.2.3"
+    override_path: "../../Node_A_USB_Debug_v3_idf/components/usb_device_uac"
+  espressif/led_strip: "^3.0.0"

@@ -1,0 +1,1 @@
+/home/makotosoul/.platformio/packages/framework-espidf@3.50400.0/components/mbedtls/mbedtls/library/version_features.c

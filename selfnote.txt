@@ -1,0 +1,68 @@
+audio issue with mic record:
+
+ELF file SHA256: 08314dd42
+
+E (341) esp_core_dump_flash: Core dump flash config is corrupted! CRC=0x7bd5c66f instead of 0x0
+E (350) esp_core_dump_elf: Elf write init failed!
+E (354) esp_core_dump_common: Core dump write failed with error=-1
+Rebooting...
+ets Jul 29 2019 12:21:46
+
+rst:0xc (SW_CPU_RESET),boot:0x1f (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:1
+load:0x3fff0030,len:4876
+ho 0 tail 12 room 4
+load:0x40078000,len:16560
+load:0x40080400,len:3500
+entry 0x400805b4
+E (322) i2c: CONFLICT! driver_ng is not allowed to be used with this old driver
+
+abort() was called at PC 0x4011c15b on core 0
+
+
+Backtrace: 0x4008c280:0x3ffe3b50 0x4008c245:0x3ffe3b70 0x400925f9:0x3ffe3b90 0x4011c15b:0x3ffe3c10 0x400e522a:0x3ffe3c30 0x40081dee:0x3ffe3c60 0x40079912:0x3ffe3c90 |<-CORRUPTED
+line1 line2 the one on https://www.pschatzmann.ch/home/2021/12/15/audiokit-audio-input/ does not work also
+This output is incredibly helpful! Your scanner did exactly what it was supposed to do, and the data tells us exactly what is happening.
+
+(First, don't worry about those gpio_pullup_en(85) errors. That is just a minor bug in the audio library trying to configure an SD card pin that doesn't exist. It doesn't affect the audio at all!)
+
+Here is what the data proves:
+
+    LINE2 is definitely your onboard microphones. When you made a sound, it spiked perfectly.
+
+    LINE1 is definitely your 3.5mm jack. But it is dead flat at 56 because of a hardware limitation on this specific board.
+
+The "Line-In" vs. "Mic-In" Trap
+
+Earlier, I mentioned the splitter would work to route the audio pins correctly. While the physical pins do line up, your scanner just revealed a harsh reality about the Ai-Thinker V2.2 schematic: The 3.5mm jack on this board does not provide power.
+
+Your "in-ear mic" is what is called an electret microphone. Electret microphones require a small amount of voltage (usually ~3V, called "Plugin Power" or "Mic Bias") to turn on.
+
+    When you plug your splitter into a Windows PC, the PC's pink microphone port automatically supplies this 3V power to the microphone.
+
+    The ESP32 Audio Kit's 3.5mm port is a true "Line-In". It is designed for active audio sources (like plugging in an AUX cord from your phone playing music). It has AC-coupling capacitors that physically block DC voltage, meaning it cannot provide power to your in-ear microphone.
+
+Because the mic is getting no power from the ESP32, it is essentially turned off, which is why LINE1 is just reading flat background static (56).
+
+(If you want to prove the jack works, unplug the mic, take an AUX cable, plug it from your phone's headphone jack into the ESP32's LINEIN, and play a YouTube video. You will see LINE1 instantly spike with the music!)
+How to move forward with your project
+
+Since the 3.5mm jack cannot power a headset mic without physically soldering new components to the board, you have two choices for your transmitter:
+
+Option 1: Use the Onboard Mics (Highly Recommended)
+Your scanner proves the onboard microphones (LINE2) are working flawlessly. The ESP32 is correctly powering them via the ES8388 chip's internal Mic Bias. The easiest path forward is to just use the board itself as your microphone!
+
+To do this, strip out the scanner logic and lock the transmitter code we wrote to LINE2:
+C++
+
+// Change this in your setup()
+cfg.input_device = audio_driver::ADC_INPUT_LINE2; 
+
+Option 2: Use an Active Microphone
+
+If your project absolutely requires an external microphone, you cannot use a standard passive headset. You would need to plug in a powered microphone system (like a battery-powered lavalier mic, a wireless mic receiver, or a microphone module with a built-in pre-amp like the MAX4466) into that 3.5mm jack.
+
+
+turn out line in is different than mic, mic need 3v electric 

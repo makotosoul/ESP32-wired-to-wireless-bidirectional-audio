@@ -1,0 +1,8 @@
+dependencies:
+  # Reuse the patched copy vendored in the sibling v3 project. Single source
+  # of truth for the PlatformIO duplicate-target patch on usb_descriptors.c
+  # (see ../Node_A_USB_Debug_v3_idf/DEBUGGING_JOURNEY.md section 9).
+  espressif/usb_device_uac:
+    version: "^1.2.3"
+    override_path: "../../Node_A_USB_Debug_v3_idf/components/usb_device_uac"
+  espressif/led_strip: "^3.0.0"

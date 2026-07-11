@@ -1,0 +1,8 @@
+dependencies:
+  # Same patched component shared with every other Node A IDF project.
+  # With SPEAK=1 + MIC=1 here, CFG_TUD_AUDIO_FUNC_1_N_AS_INT=2 (same as
+  # bridge). The only variable vs Test B is speaker channel count (mono).
+  espressif/usb_device_uac:
+    version: "^1.2.3"
+    override_path: "../../Node_A_USB_Debug_v3_idf/components/usb_device_uac"
+  espressif/led_strip: "^3.0.0"

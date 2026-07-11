@@ -1,0 +1,25 @@
+# FreeRTOS tick for stable 1 ms delays.
+CONFIG_FREERTOS_HZ=1000
+
+# UAC: speaker STEREO + mic MONO, both at 44.1 kHz.
+# Speaker side matches Node_A_Audio_idf (which works end-to-end with
+# Node_B_Audio.ino). Mic side is new -- intentionally enabled to force
+# the patched component down the N_AS_INT=2 codepath while keeping the
+# speaker wire format unchanged.
+CONFIG_UAC_SAMPLE_RATE=44100
+CONFIG_UAC_SPEAKER_CHANNEL_NUM=2
+CONFIG_UAC_MIC_CHANNEL_NUM=1
+CONFIG_UAC_SPK_INTERVAL_MS=10
+CONFIG_UAC_MIC_INTERVAL_MS=10
+# 10 ms @ 44.1 kHz stereo 16-bit speaker => 1764 B per uac_output_cb call.
+# 10 ms @ 44.1 kHz mono 16-bit  mic     => 882  B per uac_input_cb  call.
+
+# Pin USB / UAC worker tasks to Core 1; leave Core 0 for WiFi + ESP-NOW.
+CONFIG_UAC_TINYUSB_TASK_CORE=1
+CONFIG_UAC_SPK_TASK_CORE=1
+CONFIG_UAC_MIC_TASK_CORE=1
+CONFIG_ESP_WIFI_TASK_CORE_ID=0
+
+# Bursty ESP-NOW (one 240 B speaker packet every ~5.4 ms).
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32
