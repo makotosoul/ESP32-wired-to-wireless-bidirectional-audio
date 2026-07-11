@@ -1,0 +1,21 @@
+dependencies:
+  esphome/micro-opus:
+    component_hash: c4cec51b6e45b9b660bf8725a10c65f46485ff8b37ff664e4da3fd738301c71e
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 0.4.1
+  espressif/esp_codec_dev:
+    component_hash: 896c67360ae1f8dedaf8a53dfe48c015317fa455f061a5165307892296990028
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.5.10
+  idf:
+    component_hash: null
+    source:
+      type: idf
+    version: 5.4.0
+manifest_hash: 70c628a0b5cb7b10180f80a648a180ecb0d298bd1ba23af985753ffb3e1e1ed9
+target: esp32
+version: 1.0.0

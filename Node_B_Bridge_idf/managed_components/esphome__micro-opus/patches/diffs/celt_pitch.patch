@@ -1,0 +1,12 @@
+--- a/celt/pitch.h
++++ b/celt/pitch.h
+@@ -50,6 +50,10 @@
+ # include "arm/pitch_arm.h"
+ #endif
+
++#if defined (OPUS_XTENSA_LX7)
++#include "xtensa/pitch_lx7.h"
++#endif
++
+ void pitch_downsample(celt_sig * OPUS_RESTRICT x[], opus_val16 * OPUS_RESTRICT x_lp,
+       int len, int C, int factor, int arch);

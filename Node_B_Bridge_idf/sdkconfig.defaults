@@ -1,0 +1,23 @@
+# FreeRTOS tick at 1 kHz for fine-grained scheduling.
+CONFIG_FREERTOS_HZ=1000
+
+# Pin WiFi / ESP-NOW work to Core 0 so audio tasks on Core 1 aren't preempted.
+CONFIG_ESP_WIFI_TASK_CORE_ID=0
+
+# Bursty ESP-NOW traffic (mic 200 B / 25 ms + spk 240 B / 10 ms).
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32
+
+# Bluetooth not used — free up RAM/flash.
+CONFIG_BT_ENABLED=n
+
+# Larger main task stack: codec init + I2S setup is chunky during boot.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+
+# A1S ESP32-WROOM (no PSRAM): minimize micro-opus RAM for speaker decode only.
+# CONFIG_OPUS_THREADSAFE_PSEUDOSTACK is not set
+CONFIG_OPUS_NONTHREADSAFE_PSEUDOSTACK=y
+CONFIG_OPUS_PSEUDOSTACK_SIZE=60000
+CONFIG_OPUS_STATE_INTERNAL_ONLY=y
+CONFIG_OPUS_PSEUDOSTACK_INTERNAL_ONLY=y
+# CONFIG_OPUS_FLOATING_POINT is not set

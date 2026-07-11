@@ -1,0 +1,30 @@
+# FreeRTOS tick for stable 1 ms delays (LED, pacing).
+CONFIG_FREERTOS_HZ=1000
+
+# USB UAC: 48 kHz mono mic + speaker (single shared clock in usb_device_uac).
+CONFIG_UAC_SAMPLE_RATE=48000
+CONFIG_UAC_MIC_CHANNEL_NUM=1
+CONFIG_UAC_SPEAKER_CHANNEL_NUM=1
+CONFIG_UAC_MIC_INTERVAL_MS=10
+CONFIG_UAC_SPK_INTERVAL_MS=10
+# 10 ms @ 48 kHz mono 16-bit => 960 bytes per UAC callback.
+
+# Pin USB / UAC worker tasks to Core 1; leave Core 0 for WiFi + ESP-NOW codec.
+CONFIG_UAC_TINYUSB_TASK_CORE=1
+CONFIG_UAC_MIC_TASK_CORE=1
+CONFIG_UAC_SPK_TASK_CORE=1
+
+CONFIG_ESP_WIFI_TASK_CORE_ID=0
+
+# Bursty ESP-NOW (mic 200 B / 25 ms + spk 240 B / 10 ms).
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32
+
+# ESP32-S3 N16R8 OPI PSRAM — required for micro-opus (~120 KB pseudostack per thread).
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_USE_CAPS_ALLOC=y
+CONFIG_SPIRAM_SPEED_80M=y
+
+# Opus encode on S3: fixed-point is faster and uses less CPU than float SILK path.
+CONFIG_OPUS_FLOATING_POINT=n
