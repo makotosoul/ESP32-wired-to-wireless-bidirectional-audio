@@ -32,11 +32,12 @@
 #include "usb_device_uac.h"
 #include "opus.h"
 #include "bridge_spk.h"
+#include "peers.h"
 
 static const char *TAG = "bridge_a";
 
-/* Node B MAC — mirrors peers.h (update via auto_mac_setup.sh if boards change). */
-static const uint8_t NODE_B_ADDR[6] = {0xe0, 0x8c, 0xfe, 0x63, 0xff, 0x28};
+/* Node B MAC — from peers.h (update via auto_mac_setup.sh if boards change). */
+static const uint8_t NODE_B_ADDR[6] = {PEER_MAC_B};
 
 #define ESP_NOW_CHANNEL         1
 

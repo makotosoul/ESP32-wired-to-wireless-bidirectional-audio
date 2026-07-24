@@ -3,7 +3,8 @@
 # Handle Ctrl+C (SIGINT) to stop the script immediately
 trap "echo -e '\nExiting...'; exit" INT
 
-BASE_DIR="/home/makotosoul/project/Thesis"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$SCRIPT_DIR"
 NODE_A_PROJECT="$BASE_DIR/Node_A_Bridge_idf"
 NODE_B_PROJECT="$BASE_DIR/Node_B_Bridge_idf"
 
