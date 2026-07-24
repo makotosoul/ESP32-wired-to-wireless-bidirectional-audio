@@ -45,11 +45,12 @@
 #include "esp_codec_dev_defaults.h"
 #include "opus.h"
 #include "bridge_spk.h"
+#include "peers.h"
 
 static const char *TAG = "bridge_b";
 
-/* Node A MAC — mirrors peers.h (update via auto_mac_setup.sh if boards change). */
-static const uint8_t NODE_A_ADDR[6] = {0x1c, 0xdb, 0xd4, 0x7d, 0x7c, 0x24};
+/* Node A MAC — from peers.h (update via auto_mac_setup.sh if boards change). */
+static const uint8_t NODE_A_ADDR[6] = {PEER_MAC_A};
 
 #define ESP_NOW_CHANNEL         1
 
