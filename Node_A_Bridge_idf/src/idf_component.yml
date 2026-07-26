@@ -1,6 +1,6 @@
 dependencies:
   espressif/usb_device_uac:
     version: "^1.2.3"
-    override_path: "../../Node_A_USB_Debug_v3_idf/components/usb_device_uac"
+    override_path: "../../Node_A_Bridge_idf/components/usb_device_uac"
   espressif/led_strip: "^3.0.0"
   esphome/micro-opus: "^0.4.1"
