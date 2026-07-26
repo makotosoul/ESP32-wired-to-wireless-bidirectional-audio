@@ -26,7 +26,7 @@ dependencies:
   espressif/usb_device_uac:
     component_hash: null
     source:
-      path: /home/makotosoul/project/Thesis/Node_A_USB_Debug_v3_idf/components/usb_device_uac
+      path: /home/makotosoul/project/ESP32-wired-to-wireless-arduino/Node_A_Bridge_idf/components/usb_device_uac
       type: local
     version: 1.2.3
   idf:
@@ -34,6 +34,6 @@ dependencies:
     source:
       type: idf
     version: 5.4.0
-manifest_hash: ad13cdfdb3f6a41879a2d2d53c22aa2e1604e345963b0f9bd9f252771967c776
+manifest_hash: 93fedd7010d5a572b8adf7268316ecae50b77ed7611f1f7a3b27fadda834bdc3
 target: esp32s3
 version: 1.0.0

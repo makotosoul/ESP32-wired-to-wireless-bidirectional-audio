@@ -1,2 +1,6 @@
 peers.h
 context/*
+.pio
+get-platformio.py
+Node_A_Bridge_idf/dependencies.lock
+Node_B_Bridge_idf/dependencies.lock
