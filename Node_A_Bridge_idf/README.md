@@ -14,3 +14,6 @@ This directory contains the firmware for Node A, which runs on an ESP32-S3. Its 
 - When editing ESP-IDF configurations, run `pio run -t menuconfig`.
 - After changing any MAC address logic, ensure you run the root `auto_mac_setup.sh` to update `peers.h`.
 - Build the project using `pio run` or upload it directly with `pio run -t upload`.
+
+## Known Limitations
+The ESP-NOW link is unencrypted and does not validate the sender's MAC address. `peers.h` contains hardware MAC addresses and must not be committed publicly. See [Known Limitations](../README.md#known-limitations) in the root README.
