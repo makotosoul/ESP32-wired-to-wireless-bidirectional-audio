@@ -246,6 +246,8 @@ static esp_err_t spk_opus_encoder_init(void)
     opus_encoder_ctl(s_opus_enc, OPUS_SET_BITRATE(BRIDGE_SPK_OPUS_BITRATE));
     opus_encoder_ctl(s_opus_enc, OPUS_SET_COMPLEXITY(BRIDGE_SPK_OPUS_COMPLEXITY_ENC));
     opus_encoder_ctl(s_opus_enc, OPUS_SET_SIGNAL(OPUS_SIGNAL_MUSIC));
+    opus_encoder_ctl(s_opus_enc, OPUS_SET_MAX_BANDWIDTH(OPUS_BANDWIDTH_FULLBAND));
+    opus_encoder_ctl(s_opus_enc, OPUS_SET_BANDWIDTH(OPUS_BANDWIDTH_FULLBAND));
     ESP_LOGI(TAG, "Opus speaker encoder: %d Hz mono, %d b/s, complexity %d",
              BRIDGE_SPK_SAMPLE_RATE_HZ, BRIDGE_SPK_OPUS_BITRATE,
              BRIDGE_SPK_OPUS_COMPLEXITY_ENC);

@@ -464,6 +464,8 @@ static esp_err_t spk_opus_warmup_decode(void)
     }
     opus_encoder_ctl(enc, OPUS_SET_BITRATE(BRIDGE_SPK_OPUS_BITRATE));
     opus_encoder_ctl(enc, OPUS_SET_COMPLEXITY(BRIDGE_SPK_OPUS_COMPLEXITY_ENC));
+    opus_encoder_ctl(enc, OPUS_SET_MAX_BANDWIDTH(OPUS_BANDWIDTH_FULLBAND));
+    opus_encoder_ctl(enc, OPUS_SET_BANDWIDTH(OPUS_BANDWIDTH_FULLBAND));
 
     memset(pcm, 0, sizeof(pcm));
     int opus_bytes = opus_encode(enc, pcm, SPK_MONO_SAMPLES,
