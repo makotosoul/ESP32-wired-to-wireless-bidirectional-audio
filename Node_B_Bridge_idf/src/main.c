@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "driver/gpio.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -651,10 +653,34 @@ static void mic_task(void *arg)
     }
 }
 
+/* Pull down unused header GPIOs so they don't float and couple noise into the
+ * ES8388 audio path.  A1S V2.2 header exposes IO5, IO18, IO19, IO22, IO23
+ * which are not used by this firmware. */
+static void unused_gpio_pulldown_init(void)
+{
+    static const gpio_num_t unused_pins[] = {
+        GPIO_NUM_5, GPIO_NUM_18, GPIO_NUM_19, GPIO_NUM_22, GPIO_NUM_23
+    };
+    gpio_config_t io_cfg = {
+        .pin_bit_mask = 0,
+        .mode         = GPIO_MODE_INPUT,
+        .pull_up_en   = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,
+        .intr_type    = GPIO_INTR_DISABLE,
+    };
+    for (int i = 0; i < sizeof(unused_pins) / sizeof(unused_pins[0]); i++) {
+        io_cfg.pin_bit_mask = 1ULL << unused_pins[i];
+        gpio_config(&io_cfg);
+    }
+    ESP_LOGI(TAG, "Unused header GPIOs pulled down (5,18,19,22,23)");
+}
+
 /* ====================== app_main ====================== */
 void app_main(void)
 {
     ESP_LOGI(TAG, "Node_B_Bridge_idf (full-duplex I2S, ES8388 via esp_codec_dev)");
+
+    unused_gpio_pulldown_init();
 
     wifi_espnow_init();
 
