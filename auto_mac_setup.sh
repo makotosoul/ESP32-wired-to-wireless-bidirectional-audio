@@ -24,9 +24,25 @@ find_esptool() {
         fi
     done
 
+    # PlatformIO installs esptool.py inside its packages directory but does NOT
+    # add it to PATH.  Search the well-known location.
+    local pio_esptool="$HOME/.platformio/packages/tool-esptoolpy/esptool.py"
+    if [ -f "$pio_esptool" ]; then
+        echo "$pio_esptool"
+        return 0
+    fi
+
+    # Also try a glob in case the package name differs across PIO versions
+    for f in "$HOME"/.platformio/packages/tool-esptool*/esptool.py; do
+        if [ -f "$f" ]; then
+            echo "$f"
+            return 0
+        fi
+    done
+
     # Not found — prompt user with install instructions
     echo "" >&2
-    echo "Error: esptool not found in PATH." >&2
+    echo "Error: esptool not found in PATH or PlatformIO packages." >&2
     echo "" >&2
     echo "Install it using one of these methods:" >&2
     echo "  pip install esptool          # Python pip (recommended)" >&2
@@ -39,7 +55,7 @@ ESPTOOL=$(find_esptool)
 if [ $? -ne 0 ]; then
     exit 1
 fi
-echo "Using esptool: $(command -v "$ESPTOOL")"
+echo "Using esptool: $ESPTOOL"
 
 # ===================== Detect serial ports =====================
 USE_ARDUINO_CLI=0
