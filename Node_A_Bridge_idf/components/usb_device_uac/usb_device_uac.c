@@ -323,6 +323,7 @@ bool tud_audio_set_itf_close_EP_cb(uint8_t rhport, tusb_control_request_t const 
 #if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX
     if (s_uac_device->mic_itf_num == itf && alt == 0) {
         TU_LOG2("Microphone interface closed");
+        ESP_LOGW(TAG, "Host CLOSED mic interface %d (alt=0)", itf);
         s_uac_device->mic_data_size = 0;
         s_uac_device->mic_active = false;
     }
