@@ -420,13 +420,14 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, u
         return true;
     }
 
-    // load data chunk by chunk
-    UAC_ENTER_CRITICAL();
-    if (s_uac_device->mic_data_size > 0) {
-        tud_audio_write((void *)s_uac_device->mic_buf_read, s_uac_device->mic_data_size);
-        s_uac_device->mic_data_size = 0;
+    // Read directly from input_cb to guarantee exact synchronization with USB host
+    if (s_uac_device->user_cfg.input_cb) {
+        size_t bytes_read = 0;
+        esp_err_t ret = s_uac_device->user_cfg.input_cb((uint8_t *)s_uac_device->mic_buf_write, bytes_require, &bytes_read, s_uac_device->user_cfg.cb_ctx);
+        if (ret == ESP_OK && bytes_read > 0) {
+            tud_audio_write((void *)s_uac_device->mic_buf_write, bytes_read);
+        }
     }
-    UAC_EXIT_CRITICAL();
 
     return true;
 }
@@ -456,33 +457,8 @@ static void usb_spk_task(void *pvParam)
 #if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX
 static void usb_mic_task(void *pvParam)
 {
-    TickType_t xLastWakeTime = xTaskGetTickCount();
     while (1) {
-        if (s_uac_device->mic_active == false) {
-            // clear the notification
-            ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-            xLastWakeTime = xTaskGetTickCount();
-            continue;
-        }
-        // clear the notification
-        // read data from the microphone chunk by chunk
-        size_t bytes_require = MIC_INTERVAL_MS * s_uac_device->mic_bytes_per_ms;
-        if (s_uac_device->user_cfg.input_cb) {
-            size_t bytes_read = 0;
-            esp_err_t ret = s_uac_device->user_cfg.input_cb((uint8_t *)s_uac_device->mic_buf_write, bytes_require, &bytes_read, s_uac_device->user_cfg.cb_ctx);
-            if (ret != ESP_OK) {
-                ESP_LOGE(TAG, "Failed to read data from mic");
-                continue;
-            }
-            int16_t *tmp_buf = s_uac_device->mic_buf_write;
-            UAC_ENTER_CRITICAL();
-            s_uac_device->mic_buf_write = s_uac_device->mic_buf_read;
-            s_uac_device->mic_buf_read = tmp_buf;
-            s_uac_device->mic_data_size = bytes_read;
-            UAC_EXIT_CRITICAL();
-        }
-
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(MIC_INTERVAL_MS));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 #endif
