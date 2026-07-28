@@ -47,6 +47,7 @@ enum {
 
 // Unit numbers are arbitrary selected
 #define UAC2_ENTITY_CLOCK                0x04
+#define UAC2_ENTITY_MIC_CLOCK            0x14
 
 #if SPEAK_CHANNEL_NUM && MIC_CHANNEL_NUM
 // Speaker path
@@ -79,6 +80,7 @@ enum {
 #if SPEAK_CHANNEL_NUM && MIC_CHANNEL_NUM
 #define TUD_AUDIO_DESC_CS_AC_TOTAL_LEN ( \
     TUD_AUDIO_DESC_CLK_SRC_LEN\
+    +TUD_AUDIO_DESC_CLK_SRC_LEN\
     +TUD_AUDIO_DESC_SPK_FEATURE_UNIT_N_CHANNEL_LEN\
     +TUD_AUDIO_DESC_INPUT_TERM_LEN\
     +TUD_AUDIO_DESC_OUTPUT_TERM_LEN\
@@ -171,6 +173,8 @@ enum {
     TUD_AUDIO_DESC_CS_AC(/*_bcdADC*/ 0x0200, /*_category*/ AUDIO_FUNC_HEADSET, /*_totallen*/ TUD_AUDIO_DESC_CS_AC_TOTAL_LEN, /*_ctrl*/ AUDIO_CS_AS_INTERFACE_CTRL_LATENCY_POS),\
     /* Clock Source Descriptor(4.7.2.1) */\
     TUD_AUDIO_DESC_CLK_SRC(/*_clkid*/ UAC2_ENTITY_CLOCK, /*_attr*/ 3, /*_ctrl*/ 7, /*_assocTerm*/ 0x00,  /*_stridx*/ 0x00),\
+    /* Clock Source Descriptor for Mic */\
+    TUD_AUDIO_DESC_CLK_SRC(/*_clkid*/ UAC2_ENTITY_MIC_CLOCK, /*_attr*/ 3, /*_ctrl*/ 7, /*_assocTerm*/ 0x00,  /*_stridx*/ 0x00),\
     /* Input Terminal Descriptor(4.7.2.4) */\
     TUD_AUDIO_DESC_INPUT_TERM(/*_termid*/ UAC2_ENTITY_SPK_INPUT_TERMINAL, /*_termtype*/ AUDIO_TERM_TYPE_USB_STREAMING, /*_assocTerm*/ 0x00, /*_clkid*/ UAC2_ENTITY_CLOCK, /*_nchannelslogical*/ SPEAK_CHANNEL_NUM, /*_channelcfg*/ AUDIO_CHANNEL_CONFIG_NON_PREDEFINED, /*_idxchannelnames*/ 0x00, /*_ctrl*/ (AUDIO_CTRL_R << AUDIO_IN_TERM_CTRL_CONNECTOR_POS), /*_stridx*/ 0x00),\
     /* Feature Unit Descriptor(4.7.2.8) */\
@@ -178,9 +182,9 @@ enum {
     /* Output Terminal Descriptor(4.7.2.5) */\
     TUD_AUDIO_DESC_OUTPUT_TERM(/*_termid*/ UAC2_ENTITY_SPK_OUTPUT_TERMINAL, /*_termtype*/ AUDIO_TERM_TYPE_OUT_GENERIC_SPEAKER, /*_assocTerm*/ 0x00, /*_srcid*/ UAC2_ENTITY_SPK_FEATURE_UNIT, /*_clkid*/ UAC2_ENTITY_CLOCK, /*_ctrl*/ 0x0000, /*_stridx*/ 0x00),\
     /* Input Terminal Descriptor(4.7.2.4) */\
-    TUD_AUDIO_DESC_INPUT_TERM(/*_termid*/ UAC2_ENTITY_MIC_INPUT_TERMINAL, /*_termtype*/ AUDIO_TERM_TYPE_IN_GENERIC_MIC, /*_assocTerm*/ UAC2_ENTITY_MIC_OUTPUT_TERMINAL, /*_clkid*/ UAC2_ENTITY_CLOCK, /*_nchannelslogical*/ MIC_CHANNEL_NUM, /*_channelcfg*/ AUDIO_CHANNEL_CONFIG_FRONT_CENTER, /*_idxchannelnames*/ 0x00, /*_ctrl*/ (AUDIO_CTRL_R << AUDIO_IN_TERM_CTRL_CONNECTOR_POS), /*_stridx*/ 0x00),\
+    TUD_AUDIO_DESC_INPUT_TERM(/*_termid*/ UAC2_ENTITY_MIC_INPUT_TERMINAL, /*_termtype*/ AUDIO_TERM_TYPE_IN_GENERIC_MIC, /*_assocTerm*/ UAC2_ENTITY_MIC_OUTPUT_TERMINAL, /*_clkid*/ UAC2_ENTITY_MIC_CLOCK, /*_nchannelslogical*/ MIC_CHANNEL_NUM, /*_channelcfg*/ AUDIO_CHANNEL_CONFIG_FRONT_CENTER, /*_idxchannelnames*/ 0x00, /*_ctrl*/ (AUDIO_CTRL_R << AUDIO_IN_TERM_CTRL_CONNECTOR_POS), /*_stridx*/ 0x00),\
     /* Output Terminal Descriptor(4.7.2.5) */\
-    TUD_AUDIO_DESC_OUTPUT_TERM(/*_termid*/ UAC2_ENTITY_MIC_OUTPUT_TERMINAL, /*_termtype*/ AUDIO_TERM_TYPE_USB_STREAMING, /*_assocTerm*/ 0x00, /*_srcid*/ UAC2_ENTITY_MIC_INPUT_TERMINAL, /*_clkid*/ UAC2_ENTITY_CLOCK, /*_ctrl*/ 0x0000, /*_stridx*/ 0x00),\
+    TUD_AUDIO_DESC_OUTPUT_TERM(/*_termid*/ UAC2_ENTITY_MIC_OUTPUT_TERMINAL, /*_termtype*/ AUDIO_TERM_TYPE_USB_STREAMING, /*_assocTerm*/ 0x00, /*_srcid*/ UAC2_ENTITY_MIC_INPUT_TERMINAL, /*_clkid*/ UAC2_ENTITY_MIC_CLOCK, /*_ctrl*/ 0x0000, /*_stridx*/ 0x00),\
     TUD_AUDIO_DESC_FEATURE_UNIT_N_CHANNEL(/*_length*/ TUD_AUDIO_DESC_MIC_FEATURE_UNIT_N_CHANNEL_LEN, /*_unitid*/ UAC2_ENTITY_MIC_FEATURE_TERMINAL, /*_srcid*/ UAC2_ENTITY_MIC_INPUT_TERMINAL, /*_stridx*/ 0x00, MIC_CTRL),\
     /* Standard AS Interface Descriptor(4.9.1) */\
     /* Interface 1, Alternate 0 - default alternate setting with 0 bandwidth */\
