@@ -326,10 +326,9 @@ static esp_err_t uac_input_cb(uint8_t *buf, size_t len, size_t *bytes_read, void
     s_last_uac_in_ms = (uint32_t)(xTaskGetTickCount() * portTICK_PERIOD_MS);
     size_t got = xStreamBufferReceive(s_mic_stream, buf, len, 0);
     if (got < len) {
-        memset(buf + got, 0, len - got);
         s_mic_underrun_bytes += (len - got);
     }
-    *bytes_read = len;
+    *bytes_read = got;
     return ESP_OK;
 }
 

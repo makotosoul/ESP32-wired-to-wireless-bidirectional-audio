@@ -412,18 +412,16 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, u
     (void)itf;
     (void)ep_in;
     (void)cur_alt_setting;
-    size_t bytes_require = MIC_INTERVAL_MS * s_uac_device->mic_bytes_per_ms;
-
+    
+    // TinyUSB has a software FIFO for the IN endpoint.
+    // We should greedily suck all available data from the ESP-NOW stream into the FIFO
+    // up to the available FIFO space. This completely absorbs network jitter.
     tu_fifo_t *sw_in_fifo = tud_audio_get_ep_in_ff();
     uint16_t fifo_remained = tu_fifo_remaining(sw_in_fifo);
-    if (fifo_remained < bytes_require) {
-        return true;
-    }
 
-    // Read directly from input_cb to guarantee exact synchronization with USB host
-    if (s_uac_device->user_cfg.input_cb) {
+    if (fifo_remained > 0 && s_uac_device->user_cfg.input_cb) {
         size_t bytes_read = 0;
-        esp_err_t ret = s_uac_device->user_cfg.input_cb((uint8_t *)s_uac_device->mic_buf_write, bytes_require, &bytes_read, s_uac_device->user_cfg.cb_ctx);
+        esp_err_t ret = s_uac_device->user_cfg.input_cb((uint8_t *)s_uac_device->mic_buf_write, fifo_remained, &bytes_read, s_uac_device->user_cfg.cb_ctx);
         if (ret == ESP_OK && bytes_read > 0) {
             tud_audio_write((void *)s_uac_device->mic_buf_write, bytes_read);
         }
