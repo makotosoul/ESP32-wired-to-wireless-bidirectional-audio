@@ -21,7 +21,7 @@
 #define BRIDGE_SPK_OPUS_HDR_BYTES   2       /* magic + opus_payload_len */
 
 #define BRIDGE_SPK_OPUS_BITRATE     128000
-#define BRIDGE_SPK_OPUS_COMPLEXITY_ENC  4
+#define BRIDGE_SPK_OPUS_COMPLEXITY_ENC  2
 #define BRIDGE_SPK_OPUS_COMPLEXITY_DEC  2
 
 static inline int bridge_spk_is_adpcm_pkt(int len)
